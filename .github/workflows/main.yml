@@ -1,0 +1,43 @@
+name: Deploy Infrastructure as Code - Bicep
+on: [push]
+# Allows you to run this workflow manually from the Actions tab
+workflow_dispatch:
+# jobs  
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      ResourceGroupName: rg-demo-1
+      ResourceGroupLocation: "australiaeast"
+      AZURE_FUNCTIONAPP_NAME: funcapptest5
+    steps:
+
+      # Checkout code
+    - uses: actions/checkout@main
+
+      # Log into Azure
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      # Build Bicep file
+    - name: Azure Bicep Build
+      run: |
+        az bicep build --file ./Bicep/templates/mainFuncApp.bicep
+
+    - name: Az CLI Create Resource Group
+      uses: Azure/CLI@v1
+      with:
+        inlineScript: |
+          #!/bin/bash
+          az group create --name ${{ env.ResourceGroupName }} --location ${{ env.ResourceGroupLocation }}
+          
+      # Deploy Bicep file
+    - name: deploy
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+        resourceGroupName: ${{ env.ResourceGroupName }}
+        template: ./Bicep/templates/mainFuncApp.bicep
+        parameters: appName=${{ env.AZURE_FUNCTIONAPP_NAME }}
+        failOnStdErr: false
