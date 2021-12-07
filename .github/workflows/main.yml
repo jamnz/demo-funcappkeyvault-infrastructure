@@ -7,7 +7,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env:
-      ResourceGroupName: rg-demo-1
+      ResourceGroupName: rg-demo-funcappkeyvault1
       ResourceGroupLocation: "australiaeast"
       AZURE_FUNCTIONAPP_NAME: funcapptest5
     steps:
@@ -23,7 +23,7 @@ jobs:
       # Build Bicep file
     - name: Azure Bicep Build
       run: |
-        az bicep build --file ./Bicep/templates/mainFuncApp.bicep
+        az bicep build --file ./main.bicep
 
     - name: Az CLI Create Resource Group
       uses: Azure/CLI@v1
